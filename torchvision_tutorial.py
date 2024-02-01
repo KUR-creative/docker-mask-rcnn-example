@@ -165,8 +165,7 @@ class PennFudanDataset(torch.utils.data.Dataset):
         # load images and masks
         img = read_image(self.img_paths[idx])
         mask = read_image(self.mask_paths[idx])
-        visualize(img, mask, 'out/2.png')
-        exit(0)
+
         # instances are encoded as different colors
         obj_ids = torch.unique(mask)
         # first id is the background, so remove it
@@ -185,7 +184,7 @@ class PennFudanDataset(torch.utils.data.Dataset):
 
         image_id = idx
         area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
-        # suppose all instances are not crowd
+        # suppose all instances are not crowd NOTE: ?? crowd ??
         iscrowd = torch.zeros((num_objs,), dtype=torch.int64)
 
         # Wrap sample and targets into torchvision tv_tensors:
@@ -253,7 +252,7 @@ model = torchvision.models.detection.fasterrcnn_resnet50_fpn(weights="DEFAULT")
 
 # replace the classifier with a new one, that has
 # num_classes which is user-defined
-num_classes = 2  # 1 class (person) + background
+num_classes = 2  # 1 class (object) + background
 # get number of input features for the classifier
 in_features = model.roi_heads.box_predictor.cls_score.in_features
 # replace the pre-trained head with a new one
@@ -407,14 +406,15 @@ images, targets = next(iter(data_loader))
 images = list(image for image in images)
 targets = [{k: v for k, v in t.items()} for t in targets]
 output = model(images, targets)  # Returns losses and detections
-print(output)
+pprint(output)
 
 # For inference
 model.eval()
 x = [torch.rand(3, 300, 400), torch.rand(3, 500, 400)]
 predictions = model(x)  # Returns predictions
-print(predictions[0])
+pprint(predictions[0])
 
+exit(0)
 
 ######################################################################
 # Let’s now write the main function which performs the training and the
