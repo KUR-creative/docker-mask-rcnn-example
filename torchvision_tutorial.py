@@ -113,14 +113,15 @@ from torchvision.io import read_image
 image = read_image("test/fixture/ipa/o_rgb/cycle_0000/015_rgb.png")
 mask = read_image("test/fixture/ipa/o_seg/cycle_0000/015_segmentation.png")
 
-plt.figure(figsize=(16, 8))
-plt.subplot(121)
-plt.title("Image")
-plt.imshow(image.permute(1, 2, 0))
-plt.subplot(122)
-plt.title("Mask")
-plt.imshow(mask.permute(1, 2, 0))
-plt.savefig("out/1.png")
+def visualize(img_tensor, mask_tensor, out_path):
+    plt.figure(figsize=(16, 8))
+    plt.subplot(121); plt.title("I"); plt.imshow(img_tensor.permute(1, 2, 0))
+    plt.subplot(122); plt.title("M"); plt.imshow(mask_tensor.permute(1, 2, 0))
+    plt.savefig(out_path)
+
+visualize(read_image("test/fixture/ipa/o_rgb/cycle_0000/015_rgb.png"),
+          read_image("test/fixture/ipa/o_seg/cycle_0000/015_segmentation.png"),
+          'out/1.png')
 
 ######################################################################
 # So each image has a corresponding
@@ -156,18 +157,16 @@ class PennFudanDataset(torch.utils.data.Dataset):
         self.transforms = transforms
         # load all image files, sorting them to
         # ensure that they are aligned
-        self.imgs = sorted(fu.pathseq(Path(root, 'o_rgb'), is_png))
-        self.masks = sorted(fu.pathseq(Path(root, 'o_seg'), is_png))
-        pprint(self.imgs[-10:])
-        pprint(self.masks[-10:])
-        exit(0)
+        self.img_paths = sorted(fu.pathseq(Path(root, 'o_rgb'), is_png))
+        self.mask_paths = sorted(fu.pathseq(Path(root, 'o_seg'), is_png))
+        assert len(self.img_paths) == len(self.mask_paths)
 
     def __getitem__(self, idx):
         # load images and masks
-        img_path = os.path.join(self.root, "PNGImages", self.imgs[idx])
-        mask_path = os.path.join(self.root, "PedMasks", self.masks[idx])
-        img = read_image(img_path)
-        mask = read_image(mask_path)
+        img = read_image(self.img_paths[idx])
+        mask = read_image(self.mask_paths[idx])
+        visualize(img, mask, 'out/2.png')
+        exit(0)
         # instances are encoded as different colors
         obj_ids = torch.unique(mask)
         # first id is the background, so remove it
@@ -206,7 +205,7 @@ class PennFudanDataset(torch.utils.data.Dataset):
         return img, target
 
     def __len__(self):
-        return len(self.imgs)
+        return len(self.img_paths)
 
 ######################################################################
 # That’s all for the dataset. Now let’s define a model that can perform
