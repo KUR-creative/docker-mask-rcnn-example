@@ -243,7 +243,7 @@ class PennFudanDataset(torch.utils.data.Dataset):
 # and want to finetune it for your particular classes. Here is a possible
 # way of doing it:
 
-
+"""
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
@@ -305,6 +305,7 @@ model = FasterRCNN(
     rpn_anchor_generator=anchor_generator,
     box_roi_pool=roi_pooler
 )
+"""
 
 ######################################################################
 # Object detection and instance segmentation model for PennFudan Dataset
@@ -414,7 +415,6 @@ x = [torch.rand(3, 300, 400), torch.rand(3, 500, 400)]
 predictions = model(x)  # Returns predictions
 pprint(predictions[0])
 
-exit(0)
 
 ######################################################################
 # Let’s now write the main function which performs the training and the
@@ -429,8 +429,8 @@ device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 # our dataset has two classes only - background and person
 num_classes = 2
 # use our dataset and defined transformations
-dataset = PennFudanDataset('data/PennFudanPed', get_transform(train=True))
-dataset_test = PennFudanDataset('data/PennFudanPed', get_transform(train=False))
+dataset = PennFudanDataset('test/fixture/ipa', get_transform(train=True))
+dataset_test = PennFudanDataset('test/fixture/ipa', get_transform(train=False))
 
 # split the dataset in train and test set
 indices = torch.randperm(len(dataset)).tolist()
@@ -503,7 +503,7 @@ import matplotlib.pyplot as plt
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 
 
-image = read_image("data/PennFudanPed/PNGImages/FudanPed00046.png")
+image = read_image("test/fixture/ipa/o_rgb/cycle_0000/015_rgb.png")
 eval_transform = get_transform(train=False)
 
 model.eval()
@@ -527,7 +527,7 @@ output_image = draw_segmentation_masks(output_image, masks, alpha=0.5, colors="b
 
 plt.figure(figsize=(12, 12))
 plt.imshow(output_image.permute(1, 2, 0))
-plt.savefig("out/2.png")
+plt.savefig("out/3.png")
 
 ######################################################################
 # The results look good!
