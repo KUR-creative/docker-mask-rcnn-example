@@ -110,8 +110,8 @@ import matplotlib.pyplot as plt
 from torchvision.io import read_image
 
 
-image = read_image("data/PennFudanPed/PNGImages/FudanPed00046.png")
-mask = read_image("data/PennFudanPed/PedMasks/FudanPed00046_mask.png")
+image = read_image("test/fixture/ipa/o_rgb/cycle_0000/015_rgb.png")
+mask = read_image("test/fixture/ipa/o_seg/cycle_0000/015_segmentation.png")
 
 plt.figure(figsize=(16, 8))
 plt.subplot(121)
@@ -144,15 +144,23 @@ from torchvision.ops.boxes import masks_to_boxes
 from torchvision import tv_tensors
 from torchvision.transforms.v2 import functional as F
 
+from pprint import pprint
+from pathlib import Path, PurePosixPath
+import file_utils as fu
 
+def is_png(path):
+    return (PurePosixPath(path).suffix == '.png')
 class PennFudanDataset(torch.utils.data.Dataset):
     def __init__(self, root, transforms):
         self.root = root
         self.transforms = transforms
         # load all image files, sorting them to
         # ensure that they are aligned
-        self.imgs = list(sorted(os.listdir(os.path.join(root, "PNGImages"))))
-        self.masks = list(sorted(os.listdir(os.path.join(root, "PedMasks"))))
+        self.imgs = sorted(fu.pathseq(Path(root, 'o_rgb'), is_png))
+        self.masks = sorted(fu.pathseq(Path(root, 'o_seg'), is_png))
+        pprint(self.imgs[-10:])
+        pprint(self.masks[-10:])
+        exit(0)
 
     def __getitem__(self, idx):
         # load images and masks
@@ -386,7 +394,7 @@ import utils
 
 
 model = torchvision.models.detection.fasterrcnn_resnet50_fpn(weights="DEFAULT")
-dataset = PennFudanDataset('data/PennFudanPed', get_transform(train=True))
+dataset = PennFudanDataset('test/fixture/ipa', get_transform(train=True))
 data_loader = torch.utils.data.DataLoader(
     dataset,
     batch_size=2,
