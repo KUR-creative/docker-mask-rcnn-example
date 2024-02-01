@@ -1,6 +1,7 @@
 __pycache__
 data
 out
+env/docker
 
 ## Vim
 # Swap
